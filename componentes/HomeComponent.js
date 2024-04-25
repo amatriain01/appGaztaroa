@@ -12,9 +12,10 @@ function RenderItem(props) {
     if (item != null) {
         return (
             <Card>
-                <Card.Title>{item.nombre}</Card.Title>
                 <Card.Divider />
-                <Card.Image source={require('./imagenes/40Años.png')}></Card.Image>
+                <Card.Image source={require('./imagenes/40Años.png')}>
+                    <Card.Title style={{ fontSize: 36, color: 'chocolate' }}>{item.nombre}</Card.Title>
+                </Card.Image>
                 <Text style={{ margin: 20 }}>
                     {item.descripcion}
                 </Text>
