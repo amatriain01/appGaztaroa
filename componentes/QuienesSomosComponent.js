@@ -7,6 +7,7 @@ import { SafeAreaView, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { baseUrl } from '../comun/comun';
 import { connect } from 'react-redux';
+import { IndicadorActividad } from './IndicadorActividadComponent';
 
 const mapStateToProps = state => {
     return {
@@ -58,22 +59,40 @@ class QuienesSomos extends Component {
             );
         };
 
-        return (
-            <ScrollView>
-                <Historia historia={this.state.historia[0]} />
-                <Card>
-                    <Card.Title>"Actividades y recursos"</Card.Title>
-                    <Card.Divider />
-                    <SafeAreaView>
-                        <FlatList scrollEnabled={false}
+        if (this.props.actividades.isLoading) {
+            return (
+                <ScrollView>
+                    <Historia />
+                    <Card>
+                        <Card.Title>"Actividades y recursos"</Card.Title>
+                        <Card.Divider />
+                        <IndicadorActividad />
+                    </Card>
+                </ScrollView>
+            );
+        } else if (this.props.actividades.errMess) {
+            return (
+                <View>
+                    <Text>{this.props.actividades.errMess}</Text>
+                </View>
+            );
+        } else {
+            return (
+                <ScrollView>
+                    <Historia />
+                    <Card>
+                        <Card.Title>"Actividades y recursos"</Card.Title>
+                        <Card.Divider />
+                        <FlatList
+                            scrollEnabled={false}
                             data={this.props.actividades.actividades}
                             renderItem={renderActividadItem}
-                            keyExtractor={item => item.id.toString()}
+                            keyExtractor={(item) => item.id.toString()}
                         />
-                    </SafeAreaView>
-                </Card>
-            </ScrollView>
-        );
+                    </Card>
+                </ScrollView>
+            );
+        }
     }
 }
 

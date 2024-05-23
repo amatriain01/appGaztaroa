@@ -2,6 +2,9 @@ import * as ActionTypes from './ActionTypes';
 import { baseUrl } from '../comun/comun';
 
 export const fetchComentarios = () => (dispatch) => {
+
+    dispatch(comentariosLoading());
+
     return fetch(baseUrl + 'comentarios')
         .then(response => {
             if (response.ok) {
@@ -20,6 +23,10 @@ export const fetchComentarios = () => (dispatch) => {
         .then(comentarios => dispatch(addComentarios(comentarios)))
         .catch(error => dispatch(comentariosFailed(error.message)));
 };
+
+export const comentariosLoading = () => ({
+    type: ActionTypes.COMENTARIOS_LOADING
+});
 
 export const comentariosFailed = (errmess) => ({
     type: ActionTypes.COMENTARIOS_FAILED,
@@ -140,4 +147,15 @@ export const actividadesFailed = (errmess) => ({
 export const addActividades = (actividades) => ({
     type: ActionTypes.ADD_ACTIVIDADES,
     payload: actividades
+});
+
+export const postFavorito = (excursionId) => (dispatch) => {
+    setTimeout(() => {
+        dispatch(addFavorito(excursionId));
+    }, 2000);
+};
+
+export const addFavorito = (excursionId) => ({
+    type: ActionTypes.ADD_FAVORITO,
+    payload: excursionId
 });
