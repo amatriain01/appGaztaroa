@@ -15,6 +15,15 @@ export const comentarios = (state = {
     case ActionTypes.COMENTARIOS_FAILED:
       return { ...state, isLoading: false, errMess: action.payload };
 
+    case ActionTypes.ADD_COMENTARIO:
+      const nuevoComentario = {
+        ...action.payload,
+        id: state.comentarios.length + 1,
+      };
+      return {
+        ...state, isLoading: false, errMess: null, comentarios: state.comentarios.concat(nuevoComentario),
+      };
+
     default:
       return state;
   }

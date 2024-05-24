@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, FlatList } from 'react-native';
+import { Text, View, ScrollView, FlatList, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Card, Icon } from '@rneui/themed';
 import { baseUrl } from '../comun/comun';
 import { connect } from 'react-redux';
-import { postFavorito } from '../redux/ActionCreators';
+import { postComentario, postFavorito } from '../redux/ActionCreators';
+import { colorGaztaroaOscuro } from '../comun/comun';
+import { Input, Button, Rating } from 'react-native-elements';
+
 
 const mapStateToProps = state => {
     return {
@@ -14,9 +17,9 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = dispatch => ({
-    postFavorito: (excursionId) => dispatch(postFavorito(excursionId))
+    postFavorito: (excursionId) => dispatch(postFavorito(excursionId)),
+    postComentario: (excursionId, valoracion, autor, comentario) => dispatch(postComentario(excursionId, valoracion, autor, comentario))
 })
-
 
 function RenderExcursion(props) {
 
@@ -32,15 +35,25 @@ function RenderExcursion(props) {
                 <Text style={{ margin: 20 }}>
                     {excursion.descripcion}
                 </Text>
-                <Icon
-                    raised
-                    reverse
-                    name={props.favorita ? 'heart' : 'heart-o'}
-                    type='font-awesome'
-                    color='#f50'
-                    onPress={() => props.favorita ? console.log('La excursión ya se encuentra entre las favoritas') : props.onPress()}
-                />
-            </Card>
+                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                    <Icon
+                        raised
+                        reverse
+                        name={props.favorita ? 'heart' : 'heart-o'}
+                        type='font-awesome'
+                        color='#f50'
+                        onPress={() => props.favorita ? console.log('La excursión ya se encuentra entre las favoritas') : props.onPress()}
+                    />
+                    <Icon
+                        raised
+                        reverse
+                        name={'pencil'}
+                        type='font-awesome'
+                        color={colorGaztaroaOscuro}
+                        onPress={() => props.toggleModal()}
+                    />
+                </View>
+            </Card >
         );
     }
     else {
@@ -88,10 +101,43 @@ function RenderComentario(props) {
 }
 
 class DetalleExcursion extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            valoracion: 5,
+            autor: '',
+            comentario: '',
+            showModal: false
+        };
+        this.toggleModal = this.toggleModal.bind(this);
+        this.resetForm = this.resetForm.bind(this);
+        this.gestionarComentario = this.gestionarComentario.bind(this);
+    }
+
     marcarFavorito(excursionId) {
         this.props.postFavorito(excursionId);
     }
 
+    toggleModal() {
+        this.setState({ showModal: !this.state.showModal });
+    }
+
+    resetForm() {
+        this.setState({
+            valoracion: 3,
+            autor: '',
+            comentario: '',
+            dia: '',
+            showModal: false
+        });
+    }
+
+    gestionarComentario() {
+        const { excursionId } = this.props.route.params;
+        const { valoracion, autor, comentario } = this.state;
+        this.props.postComentario(excursionId, valoracion, autor, comentario);
+        this.resetForm();
+    }
 
     render() {
         const { excursionId } = this.props.route.params;
@@ -101,7 +147,86 @@ class DetalleExcursion extends Component {
                     excursion={this.props.excursiones.excursiones[+excursionId]}
                     favorita={this.props.favoritos.favoritos.some(el => el === excursionId)}
                     onPress={() => this.marcarFavorito(excursionId)}
+                    toggleModal={() => this.toggleModal()}
                 />
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={this.state.showModal}>
+                    <TouchableWithoutFeedback onPress={() => this.resetForm()}>
+                        <View
+                            style={{
+                                flex: 1,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                backgroundColor: "rgba(0, 0, 0, 0.5)"
+                            }}>
+                            <View
+                                style={{
+                                    backgroundColor: "white",
+                                    padding: 20,
+                                    borderRadius: 10,
+                                    width: '95%'
+                                }}>
+                                <Card>
+                                    <Card.Title>Añadir Comentario</Card.Title>
+                                    <Card.Divider />
+                                    <Rating
+                                        ratingCount={5}
+                                        startingValue={5}
+                                        imageSize={60}
+                                        showRating
+                                        onFinishRating={(value) => this.setState({ valoracion: value })}
+                                    />
+                                    <Input
+                                        inputStyle={{ padding: 10 }}
+                                        placeholder='Autor'
+                                        leftIcon={
+                                            <Icon name="user"
+                                                type="font-awesome"
+                                                size={24}
+                                                color="black"
+                                            />}
+                                        value={this.state.autor}
+                                        onChangeText={(value) => this.setState({ autor: value })}
+                                    />
+                                    <Input
+                                        inputStyle={{ padding: 10 }}
+                                        placeholder='Comentario'
+                                        leftIcon={
+                                            <Icon name="comment"
+                                                type="font-awesome"
+                                                size={24}
+                                                color="black"
+                                            />}
+                                        value={this.state.comentario}
+                                        onChangeText={(value) => this.setState({ comentario: value })}
+                                    />
+                                    <View
+                                        style={{
+                                            padding: 10
+                                        }}>
+                                        <Button
+                                            title="Enviar"
+                                            color={colorGaztaroaOscuro}
+                                            onPress={() => this.gestionarComentario()}
+                                        />
+                                    </View>
+                                    <View
+                                        style={{
+                                            padding: 10
+                                        }}>
+                                        <Button
+                                            title="Cancelar"
+                                            color={colorGaztaroaOscuro}
+                                            onPress={() => this.resetForm()}
+                                        />
+                                    </View>
+                                </Card>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
                 <RenderComentario
                     comentarios={this.props.comentarios.comentarios.filter((comentario) => comentario.excursionId === excursionId)}
                 />
